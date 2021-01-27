@@ -28,20 +28,24 @@ const shouldSendMessage = data => {
 const parseVaccineData = (htmlData) => parse(htmlData)
 
 const task = cron.schedule('* * * * *', async () => {
-    // In case of NY State, data was html
-    const vaccineData = await fetchVaccine()
-    
-    // build map of html into JavaScript object
-    const parsedData = parseVaccineData(vaccineData)
+    try {
+        // In case of NY State, data was html
+        const vaccineData = await fetchVaccine()
 
-    // find condition to alert Twilio
+        // build map of html into JavaScript object
+        const parsedData = parseVaccineData(vaccineData)
 
-    if (shouldSendMessage(parsedData)) {
-        twilioClient.messages.create({
-            body: "Vaccine is available",
-            to: RECIPIENT_NUMBER,
-            from: NUMBER_THAT_TWILIO_GIVES_YOU
-        })
+        // find condition to alert Twilio
+
+        if (shouldSendMessage(parsedData)) {
+            twilioClient.messages.create({
+                body: "Vaccine is available",
+                to: RECIPIENT_NUMBER,
+                from: NUMBER_THAT_TWILIO_GIVES_YOU
+            })
+        }
+    } catch (e) {
+        throw new Error(e)
     }
 });
 
